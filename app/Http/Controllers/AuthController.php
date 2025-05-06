@@ -41,11 +41,13 @@ final class AuthController extends Controller
 
             // prevent sql injection
             DB::insert(
-                'INSERT INTO users (name, email, password, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())',
+                'INSERT INTO users (name, email, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
                 [
                     $fields['name'],
                     $fields['email'],
                     $fields['password'],
+                    now(),
+                    now(),
                 ]
             );
 
