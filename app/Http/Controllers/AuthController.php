@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 final class AuthController extends Controller
@@ -73,7 +74,7 @@ final class AuthController extends Controller
                 'user' => $user,
                 'accessToken' => $accessToken,
                 'refreshToken' => $refreshToken
-            ] = $action->handle($fields);
+            ] = $action->handle($fields, $request->ip());
 
             $response = [
                 'access_token' => $accessToken,
@@ -87,7 +88,11 @@ final class AuthController extends Controller
 
             return $this->success($response, 'Login successful');
         } catch (Throwable $th) {
-            return $this->error($th, 'Login failed');
+            $statusCode = $th instanceof HttpExceptionInterface
+                ? $th->getCode()
+                : 500;
+
+            return $this->error($th, $th->getMessage(), $statusCode);
         }
     }
 
