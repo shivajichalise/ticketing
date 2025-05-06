@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\AttemptLoginAction;
 use App\Facades\Jwt;
 use App\Models\RefreshToken;
 use App\Models\User;
@@ -60,37 +61,19 @@ final class AuthController extends Controller
         }
     }
 
-    public function login(Request $request): JsonResponse
+    public function login(Request $request, AttemptLoginAction $action): JsonResponse
     {
-        $request->validate([
+        $fields = $request->validate([
             'email' => ['required', 'email:rfc'],
             'password' => ['required', 'string'],
         ]);
 
         try {
-            $user = User::where('email', $request->email)->first();
-
-            if (! $user || ! Hash::check($request->password, $user->password)) {
-                return $this->error(
-                    new Exception('Email or password is invalid'),
-                    'Email or password is invalid',
-                    401
-                );
-            }
-
-            $accessToken = Jwt::sign(
-                ['sub' => $user->id]
-            );
-
-            $refreshToken = Jwt::sign(
-                ['sub' => $user->id],
-                true
-            );
-
-            RefreshToken::create([
-                'user_id' => $user->id,
-                'token' => $refreshToken,
-            ]);
+            [
+                'user' => $user,
+                'accessToken' => $accessToken,
+                'refreshToken' => $refreshToken
+            ] = $action->handle($fields);
 
             $response = [
                 'access_token' => $accessToken,
