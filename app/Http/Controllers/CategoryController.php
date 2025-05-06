@@ -14,6 +14,9 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Benchmark;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 final class CategoryController extends Controller
 {
@@ -78,6 +81,36 @@ final class CategoryController extends Controller
         return (new CategoryResource($category))->additional([
             'status' => true,
             'message' => 'Category fetched succesfully.',
+        ]);
+    }
+
+    /**
+     * Display the breadcrumb trail for the given category.
+     */
+    public function breadcrumb(Category $category): JsonResponse
+    {
+        DB::enableQueryLog();
+
+        [$breadcrumb, $durationMs] = Benchmark::value(
+            fn (): string => $category->ancestors->pluck('name')->implode(' > ') . ' > ' . $category->name
+        );
+
+        $queries = DB::getQueryLog();
+        $queryCount = count($queries);
+        $totalDbTimeMs = collect($queries)->sum('time');
+
+        $durationSeconds = round($durationMs / 1000, 6);
+        $totalDbTimeSeconds = round($totalDbTimeMs / 1000, 6);
+
+        Log::channel('benchmark')->info('Category breadcrumb benchmark', [
+            'category_id' => $category->id,
+            'duration_seconds' => $durationSeconds,
+            'query_count' => $queryCount,
+            'db_time_seconds' => $totalDbTimeSeconds,
+        ]);
+
+        return $this->success([
+            'breadcrumb' => $breadcrumb,
         ]);
     }
 

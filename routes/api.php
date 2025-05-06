@@ -14,6 +14,7 @@ Route::post('/refresh', [AuthController::class, 'refresh'])->name('refresh');
 // Route::apiResource('categories', CategoryController::class);
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+Route::get('/categories/{category}/breadcrumb', [CategoryController::class, 'breadcrumb'])->name('categories.breadcrumb');
 
 Route::middleware(JwtAuthMiddleware::class)->group(function (): void {
     Route::get('/me', [AuthController::class, 'me'])->name('me');

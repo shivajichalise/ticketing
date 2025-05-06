@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 final class Category extends Model
 {
@@ -18,8 +19,20 @@ final class Category extends Model
         'slug',
         'parent_id',
         'path',
-        'metadata',
     ];
+
+    public function getAncestorsAttribute(): Collection
+    {
+        if (! $this->path) {
+            return collect();
+        }
+
+        $ids = collect(explode('/', trim($this->path, '/')))
+            ->filter()
+            ->map(fn ($id) => (int) $id);
+
+        return self::whereIn('id', $ids)->orderByRaw('FIELD(id, ' . $ids->implode(',') . ')')->get();
+    }
 
     public function childrens(): HasMany
     {
