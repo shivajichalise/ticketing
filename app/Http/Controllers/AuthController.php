@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\AttemptLoginAction;
 use App\Facades\Jwt;
+use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\RefreshToken;
 use App\Models\User;
 use App\Traits\RespondsWithJson;
@@ -14,7 +15,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
@@ -22,12 +22,13 @@ final class AuthController extends Controller
 {
     use RespondsWithJson;
 
-    public function register(Request $request): JsonResponse
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $fields = $request->validate([
-            'name' => ['required', 'string', 'max:225'],
-            'email' => ['required', 'email:rfc', Rule::unique('users', 'email')],
-            'password' => ['required', 'confirmed'],
+        $fields = $request->only([
+            'name',
+            'email',
+            'password',
+            'phone',
         ]);
 
         $fields['password'] = Hash::make($fields['password']);
@@ -41,10 +42,11 @@ final class AuthController extends Controller
 
             // prevent sql injection
             DB::insert(
-                'INSERT INTO users (name, email, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+                'INSERT INTO users (name, email, phone, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
                 [
                     $fields['name'],
                     $fields['email'],
+                    $fields['phone'],
                     $fields['password'],
                     now(),
                     now(),
@@ -174,6 +176,8 @@ final class AuthController extends Controller
             'id' => (string) $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'phone' => $user->phone,
+            'phone_details' => $user->phone_details,
         ]);
     }
 }
