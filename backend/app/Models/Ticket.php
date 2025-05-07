@@ -13,6 +13,7 @@ final class Ticket extends Model
         'category_id',
         'name',
         'price',
+        'limit',
     ];
 
     public function category(): BelongsTo

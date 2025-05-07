@@ -32,6 +32,7 @@ final class TicketSeeder extends Seeder
                 'name' => "Ticket #{$i}",
                 'category_id' => $ids[array_rand($ids)],
                 'price' => rand(100, 500) / 10,
+                'limit' => ceil(rand(1, 10)),
             ]);
         }
     }

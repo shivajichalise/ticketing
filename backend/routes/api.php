@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UploadController;
 use App\Http\Middleware\JwtAuthMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -28,4 +29,7 @@ Route::middleware(JwtAuthMiddleware::class)->group(function (): void {
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
     Route::post('/upload', [UploadController::class, 'store'])->name('pdf.upload');
+
+    Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+    Route::post('/tickets/{ticketId}/buy', [TicketController::class, 'buy'])->name('tickets.buy');
 });
