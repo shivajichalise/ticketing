@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\AttemptLoginAction;
 use App\Facades\Jwt;
+use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\RefreshToken;
 use App\Models\User;
@@ -179,5 +180,24 @@ final class AuthController extends Controller
             'phone' => $user->phone,
             'phone_details' => $user->phone_details,
         ]);
+    }
+
+    public function changePassword(ChangePasswordRequest $request): JsonResponse
+    {
+        $user = User::find($request->jwt_user_id);
+
+        if (! Hash::check($request->old_password, $user->password)) {
+            return $this->error(
+                new Exception('The current password is incorrect'),
+                'The current password is incorrect',
+                422
+            );
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return $this->success([], 'Password changed, successfully');
     }
 }

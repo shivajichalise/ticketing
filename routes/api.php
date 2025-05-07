@@ -20,6 +20,7 @@ Route::get('/categories/{category}/descendants', [CategoryController::class, 'de
 Route::middleware(JwtAuthMiddleware::class)->group(function (): void {
     Route::get('/me', [AuthController::class, 'me'])->name('me');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/change-password', [AuthController::class, 'changePassword'])->name('password.change');
 
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
