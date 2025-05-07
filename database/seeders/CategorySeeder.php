@@ -14,62 +14,23 @@ final class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = [
-            [
-                'id' => 1,
-                'parent_id' => null,
-                'name' => 'First',
-                'slug' => 'first',
-                'path' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 2,
-                'parent_id' => 1,
-                'name' => 'Second',
-                'slug' => 'second',
-                'path' => '1/2/',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 3,
-                'parent_id' => 2,
-                'name' => 'Third',
-                'slug' => 'third',
-                'path' => '1/2/3/',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 4,
-                'parent_id' => 3,
-                'name' => 'Fourth',
-                'slug' => 'fourth',
-                'path' => '1/2/3/4/',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 5,
-                'parent_id' => 4,
-                'name' => 'Fifth',
-                'slug' => 'fifth',
-                'path' => '1/2/3/4/5/',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'id' => 6,
-                'parent_id' => 5,
-                'name' => 'Sixth',
-                'slug' => 'sixth',
-                'path' => '1/2/3/4/5/6/',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ];
+        $now = now();
+
+        $categories = [];
+
+        for ($i = 1; $i <= 88; $i++) {
+            $categories[] = [
+                'id' => $i,
+                'parent_id' => $i === 1 ? null : $i - 1,
+                'name' => "Level {$i}",
+                'slug' => 'level-' . $i,
+                'path' => $i === 1
+                    ? null
+                    : implode('/', range(1, $i)) . '/',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
 
         Category::insert($categories);
     }

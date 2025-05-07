@@ -15,6 +15,7 @@ Route::post('/refresh', [AuthController::class, 'refresh'])->name('refresh');
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/categories/{category}/breadcrumb', [CategoryController::class, 'breadcrumb'])->name('categories.breadcrumb');
+Route::get('/categories/{category}/descendants', [CategoryController::class, 'descendants'])->name('categories.descendants');
 
 Route::middleware(JwtAuthMiddleware::class)->group(function (): void {
     Route::get('/me', [AuthController::class, 'me'])->name('me');

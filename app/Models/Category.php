@@ -34,6 +34,18 @@ final class Category extends Model
         return self::whereIn('id', $ids)->orderByRaw('FIELD(id, ' . $ids->implode(',') . ')')->get();
     }
 
+    public function getDescendantsAttribute(): Collection
+    {
+        return self::query()
+            ->where(function ($query): void {
+                $query
+                    ->where('path', 'LIKE', "{$this->id}/%")
+                    ->orWhere('path', 'LIKE', "%/{$this->id}/%");
+            })
+            ->where('id', '!=', $this->id)
+            ->get();
+    }
+
     public function childrens(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');

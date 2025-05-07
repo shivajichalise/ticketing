@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Benchmark;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -111,6 +112,37 @@ final class CategoryController extends Controller
 
         return $this->success([
             'breadcrumb' => $breadcrumb,
+        ]);
+    }
+
+    /**
+     * Display the descendants for the given category.
+     */
+    public function descendants(Category $category): AnonymousResourceCollection
+    {
+        DB::enableQueryLog();
+
+        [$descendants, $durationMs] = Benchmark::value(
+            fn (): Collection => $category->descendants
+        );
+
+        $queries = DB::getQueryLog();
+        $queryCount = count($queries);
+        $totalDbTimeMs = collect($queries)->sum('time');
+
+        $durationSeconds = round($durationMs / 1000, 6);
+        $totalDbTimeSeconds = round($totalDbTimeMs / 1000, 6);
+
+        Log::channel('benchmark')->info('Category descendants benchmark', [
+            'category_id' => $category->id,
+            'duration_seconds' => $durationSeconds,
+            'query_count' => $queryCount,
+            'db_time_seconds' => $totalDbTimeSeconds,
+        ]);
+
+        return CategoryResource::collection($descendants)->additional([
+            'status' => true,
+            'message' => 'Descendant categories fetched successfully.',
         ]);
     }
 
