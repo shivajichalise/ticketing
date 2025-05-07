@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\AttemptLoginAction;
+use App\Facades\AuditLogger;
 use App\Facades\Jwt;
 use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -91,6 +92,8 @@ final class AuthController extends Controller
                 ],
             ];
 
+            AuditLogger::log($user->id, 'login');
+
             return $this->success($response, 'Login successful');
         } catch (Throwable $th) {
             $statusCode = $th instanceof HttpExceptionInterface
@@ -154,6 +157,8 @@ final class AuthController extends Controller
         RefreshToken::where('user_id', $request->jwt_user_id)
             ->delete();
 
+        AuditLogger::log($request->jwt_user_id, 'logout');
+
         return $this->success(
             [],
             'Logged out successfully',
@@ -197,6 +202,8 @@ final class AuthController extends Controller
         $user->update([
             'password' => Hash::make($request->password),
         ]);
+
+        AuditLogger::log($user->id, 'password_change');
 
         return $this->success([], 'Password changed, successfully');
     }

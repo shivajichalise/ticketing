@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Facades\AuditLogger;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
@@ -70,6 +71,11 @@ final class CategoryController extends Controller
 
         $category->path = $materializedPath;
         $category->save();
+
+        AuditLogger::log($request->jwt_user_id, 'category_created', $category, [
+            'name' => $category->name,
+            'parent_id' => $category->parent_id,
+        ]);
 
         return (new CategoryResource($category))->additional([
             'message' => 'Category created successfully',
@@ -160,11 +166,18 @@ final class CategoryController extends Controller
 
         $parentIdChanged = $fields['parent_id'] !== $category->parent_id;
 
+        $original = $category->only(['name', 'parent_id']);
+
         $category->update($fields);
 
         if ($parentIdChanged) {
             RebuildCategoriesPathJob::dispatch($category->id, $fields['parent_id'] ?? null);
         }
+
+        AuditLogger::log($request->jwt_user_id, 'category_updated', $category, [
+            'old' => $original,
+            'new' => $category->only(['name', 'parent_id']),
+        ]);
 
         return (new CategoryResource($category))->additional([
             'status' => true,
@@ -175,7 +188,7 @@ final class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category): JsonResponse
+    public function destroy(Request $request, Category $category): JsonResponse
     {
         $hasChildrens = Category::where('parent_id', $category->id)
             ->whereNull('deleted_at')
@@ -190,6 +203,12 @@ final class CategoryController extends Controller
         }
 
         $category->delete();
+
+        AuditLogger::log($request->jwt_user_id, 'category_deleted', $category, [
+            'id' => $category->id,
+            'name' => $category->name,
+            'path' => $category->path,
+        ]);
 
         return $this->success([], 'Category soft deleted.', 204);
     }
