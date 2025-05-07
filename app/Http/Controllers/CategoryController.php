@@ -29,8 +29,13 @@ final class CategoryController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $length = $request->integer('length', 10);
+        $onlyParents = $request->boolean('only_parents', false);
 
         $categoryQuery = Category::query();
+
+        if ($onlyParents) {
+            $categoryQuery->parent();
+        }
 
         $categories = $categoryQuery->simplePaginate($length);
 
