@@ -17,6 +17,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
@@ -84,7 +85,7 @@ final class AuthController extends Controller
 
             $response = [
                 'access_token' => $accessToken,
-                'refresh_token' => $refreshToken,
+                // 'refresh_token' => $refreshToken,
                 'user' => [
                     'id' => (string) $user->id,
                     'name' => $user->name,
@@ -94,7 +95,7 @@ final class AuthController extends Controller
 
             AuditLogger::log($user->id, 'login');
 
-            return $this->success($response, 'Login successful');
+            return $this->success($response, 'Login successful')->cookie($this->refreshCookie($refreshToken));
         } catch (Throwable $th) {
             $statusCode = $th instanceof HttpExceptionInterface
                 ? $th->getCode()
@@ -106,12 +107,14 @@ final class AuthController extends Controller
 
     public function refresh(Request $request): JsonResponse
     {
-        $request->validate([
-            'refresh_token' => ['required', 'string'],
-        ]);
-
         try {
-            $storedToken = RefreshToken::where('token', $request->refresh_token)->first();
+            $cookieToken = $request->cookie('refresh_token');
+
+            if (! $cookieToken) {
+                return $this->error(new Exception('Missing refresh token'), 'Missing refresh token', 401);
+            }
+
+            $storedToken = RefreshToken::where('token', $cookieToken)->first();
 
             if (! $storedToken) {
                 return $this->error(
@@ -121,7 +124,7 @@ final class AuthController extends Controller
                 );
             }
 
-            $payload = Jwt::verify($request->refresh_token, true);
+            $payload = Jwt::verify($cookieToken, true);
 
             $user = User::find($payload['sub']);
 
@@ -145,8 +148,8 @@ final class AuthController extends Controller
 
             return $this->success([
                 'access_token' => $accessToken,
-                'refresh_token' => $refreshToken,
-            ], 'Token refreshed.');
+            ], 'Token refreshed.')
+                ->cookie($this->refreshCookie($refreshToken));
         } catch (Throwable $th) {
             return $this->error($th, 'Refresh token invalid or expired', 401);
         }
@@ -154,8 +157,9 @@ final class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        RefreshToken::where('user_id', $request->jwt_user_id)
-            ->delete();
+        $cookieToken = $request->cookie('refresh_token');
+
+        RefreshToken::where('token', $cookieToken)->delete();
 
         AuditLogger::log($request->jwt_user_id, 'logout');
 
@@ -163,7 +167,8 @@ final class AuthController extends Controller
             [],
             'Logged out successfully',
             200,
-        );
+        )
+            ->cookie($this->forgetRefreshCookie());
     }
 
     public function me(Request $request): JsonResponse
@@ -206,5 +211,33 @@ final class AuthController extends Controller
         AuditLogger::log($user->id, 'password_change');
 
         return $this->success([], 'Password changed, successfully');
+    }
+
+    private function refreshCookie(string $token): Cookie
+    {
+        $isProduction = config('app.env') === 'production';
+
+        return Cookie::create(
+            'refresh_token',
+            $token,
+            now()->addHour()
+        )
+            ->withPath('/')
+            ->withSecure($isProduction ? true : false)            // set true in production for HTTPS
+            ->withHttpOnly(true)
+            ->withSameSite('Lax');
+    }
+
+    private function forgetRefreshCookie(): Cookie
+    {
+        $isProduction = config('app.env') === 'production';
+
+        return Cookie::create('refresh_token')
+            ->withValue('')
+            ->withExpires(0)
+            ->withPath('/')
+            ->withSecure($isProduction ? true : false)
+            ->withHttpOnly(true)
+            ->withSameSite('Lax');
     }
 }
