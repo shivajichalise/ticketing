@@ -1,12 +1,12 @@
 FROM php:8.3-fpm
 
+# System dependencies
 RUN apt-get update && apt-get install -y \
     git \
     curl \
     unzip \
     zip \
     bash \
-    netcat \
     libonig-dev \
     libxml2-dev \
     libpng-dev \
@@ -18,19 +18,27 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install pdo pdo_mysql
-RUN docker-php-ext-install mbstring
-RUN docker-php-ext-install ctype
-RUN docker-php-ext-install curl
-RUN docker-php-ext-install dom
-RUN docker-php-ext-install fileinfo
-RUN docker-php-ext-install intl
-RUN docker-php-ext-install session
-RUN docker-php-ext-install xml
-RUN docker-php-ext-install filter
-RUN docker-php-ext-configure zip
-RUN docker-php-ext-install zip
+# PHP extensions (grouped for readability and cache efficiency)
+RUN docker-php-ext-install -j$(nproc) \
+    pdo \
+    pdo_mysql \
+    mbstring \
+    ctype \
+    curl \
+    dom \
+    fileinfo \
+    intl \
+    session \
+    xml \
+    filter \
+    zip
 
+# Install Composer (from official image)
 COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
 
+# Optional: create Laravel storage and cache dirs (in case not pre-existing)
+RUN mkdir -p /var/www/storage /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+# Set working directory
 WORKDIR /var/www

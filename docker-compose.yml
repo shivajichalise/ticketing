@@ -8,12 +8,16 @@ services:
         working_dir: /var/www
         volumes:
             - ./backend:/var/www
+            - ./docker/php/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
         env_file:
             - ./backend/.env.docker
         networks:
             - ticketing
         depends_on:
-            - mysql
+            mysql:
+                condition: service_healthy
+        entrypoint: ["sh", "/usr/local/bin/entrypoint.sh"]
+        command: ["php-fpm"]
 
     # frontend: React + Vite
     frontend:
@@ -60,6 +64,11 @@ services:
             - mysql_data:/var/lib/mysql
         networks:
             - ticketing
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+            interval: 5s
+            retries: 10
+            timeout: 5s
 
 volumes:
     mysql_data:
