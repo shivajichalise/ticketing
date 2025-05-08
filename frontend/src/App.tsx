@@ -1,10 +1,25 @@
-import { Button } from "./components/ui/button";
+import { Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import PrivateRoute from "./components/PrivateRoute";
+import GuestRoute from "./components/GuestRoute";
 
 function App() {
     return (
-        <div className="flex flex-col items-center justify-center min-h-svh">
-            <Button>Click me</Button>
-        </div>
+        <Routes>
+            <Route element={<Layout />}>
+                <Route element={<GuestRoute />}>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                </Route>
+
+                <Route element={<PrivateRoute />}>
+                    <Route path="/" element={<Home />} />
+                </Route>
+            </Route>
+        </Routes>
     );
 }
 
