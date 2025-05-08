@@ -31,5 +31,6 @@ Route::middleware(JwtAuthMiddleware::class)->group(function (): void {
     Route::post('/upload', [UploadController::class, 'store'])->name('pdf.upload');
 
     Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/{ticketId}', [TicketController::class, 'show'])->name('tickets.show');
     Route::post('/tickets/{ticketId}/buy', [TicketController::class, 'buy'])->name('tickets.buy');
 });

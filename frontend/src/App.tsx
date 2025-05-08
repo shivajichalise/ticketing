@@ -5,6 +5,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PrivateRoute from "./components/PrivateRoute";
 import GuestRoute from "./components/GuestRoute";
+import Ticket from "./pages/Ticket";
+import SingleTicket from "./pages/SingleTicket";
 
 function App() {
     return (
@@ -17,6 +19,8 @@ function App() {
 
                 <Route element={<PrivateRoute />}>
                     <Route path="/" element={<Home />} />
+                    <Route path="/tickets" element={<Ticket />} />
+                    <Route path="/tickets/:id" element={<SingleTicket />} />
                 </Route>
             </Route>
         </Routes>

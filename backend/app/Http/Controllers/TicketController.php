@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\TicketResource;
@@ -14,7 +16,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
-class TicketController extends Controller
+final class TicketController extends Controller
 {
     use RespondsWithJson;
 
@@ -30,22 +32,46 @@ class TicketController extends Controller
             $ticketsQuery->with('category');
         }
 
+        $ticketsQuery->withExists(['sales as paid' => function ($query) use ($request): void {
+            $query->where('user_id', $request->jwt_user_id);
+        }]);
+
         $tickets = $ticketsQuery->cursorPaginate($length);
 
         return TicketResource::collection($tickets)->additional([
             'message' => 'Tickets fetched successfully.',
             'status' => true,
         ]);
-
     }
 
-    public function buy(Request $request, $ticketId)
+    public function show(Request $request, int $ticketId)
+    {
+        $includes = explode(',', $request->query('include', ''));
+
+        $query = Ticket::query()
+            ->where('id', $ticketId)
+            ->withExists(['sales as paid' => function ($query) use ($request) {
+                $query->where('user_id', $request->jwt_user_id);
+            }]);
+
+        if (in_array('category', $includes)) {
+            $query->with('category');
+        }
+
+        $ticket = $query->firstOrFail();
+
+        return (new TicketResource($ticket))->additional([
+            'message' => 'Ticket fetched successfully.',
+            'status' => true,
+        ]);
+    }
+
+    public function buy(Request $request, int $ticketId)
     {
         $user = User::find($request->jwt_user_id);
 
         try {
             $purchase = DB::transaction(function () use ($ticketId, $user) {
-
                 $ticket = Ticket::lockForUpdate()->find($ticketId);
 
                 if (! $ticket) {

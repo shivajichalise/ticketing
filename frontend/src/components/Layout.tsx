@@ -16,6 +16,9 @@ export default function Layout() {
                             <Link to="/" className="hover:underline">
                                 Home
                             </Link>
+                            <Link to="/tickets" className="hover:underline">
+                                Tickets
+                            </Link>
                             <button
                                 onClick={logout}
                                 className="hover:underline text-sm"
