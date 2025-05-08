@@ -13,9 +13,14 @@ export async function login(email: string, password: string) {
         credentials: "include",
     });
 
-    if (!res.ok) throw new Error("Login failed");
-    const { data } = await res.json();
-    return data;
+    const json = await res.json();
+
+    if (!res.ok) {
+        const message = json.message || "Login failed";
+        throw new Error(message);
+    }
+
+    return json.data;
 }
 
 export async function register(
@@ -38,7 +43,12 @@ export async function register(
         credentials: "include",
     });
 
-    if (!res.ok) throw new Error("Registration failed");
+    const json = await res.json();
+
+    if (!res.ok) {
+        const message = json.message || "Registration failed";
+        throw new Error(message);
+    }
 }
 
 export async function logout(accessToken: string) {
@@ -61,9 +71,14 @@ export async function refresh() {
         credentials: "include",
     });
 
-    if (!res.ok) throw new Error("Token refresh failed");
-    const { data } = await res.json();
-    return data;
+    const json = await res.json();
+
+    if (!res.ok) {
+        const message = json.message || "Token refresh failed";
+        throw new Error(message);
+    }
+
+    return json.data;
 }
 
 export async function me(accessToken: string) {
@@ -74,7 +89,12 @@ export async function me(accessToken: string) {
         },
     });
 
-    if (!res.ok) throw new Error("Failed to fetch user");
-    const { data } = await res.json();
-    return data;
+    const json = await res.json();
+
+    if (!res.ok) {
+        const message = json.message || "Failed to fetch user";
+        throw new Error(message);
+    }
+
+    return json.data;
 }
