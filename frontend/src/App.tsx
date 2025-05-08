@@ -7,6 +7,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import GuestRoute from "./components/GuestRoute";
 import Ticket from "./pages/Ticket";
 import SingleTicket from "./pages/SingleTicket";
+import ChangePassword from "./pages/ChangePassword";
 
 function App() {
     return (
@@ -21,6 +22,10 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/tickets" element={<Ticket />} />
                     <Route path="/tickets/:id" element={<SingleTicket />} />
+                    <Route
+                        path="/change-password"
+                        element={<ChangePassword />}
+                    />
                 </Route>
             </Route>
         </Routes>

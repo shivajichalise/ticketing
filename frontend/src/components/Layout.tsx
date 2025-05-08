@@ -19,6 +19,12 @@ export default function Layout() {
                             <Link to="/tickets" className="hover:underline">
                                 Tickets
                             </Link>
+                            <Link
+                                to="/change-password"
+                                className="hover:underline"
+                            >
+                                Change password
+                            </Link>
                             <button
                                 onClick={logout}
                                 className="hover:underline text-sm"
