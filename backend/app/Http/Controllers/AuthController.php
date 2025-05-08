@@ -216,11 +216,12 @@ final class AuthController extends Controller
     private function refreshCookie(string $token): Cookie
     {
         $isProduction = config('app.env') === 'production';
+        $ttl = (int) config('jwt.refresh_ttl', 2);
 
         return Cookie::create(
             'refresh_token',
             $token,
-            now()->addHour()
+            now()->addMinutes($ttl)
         )
             ->withPath('/')
             ->withSecure($isProduction ? true : false)            // set true in production for HTTPS

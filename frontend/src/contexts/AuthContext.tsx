@@ -57,13 +57,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     const fetchUser = async (token: string) => {
-        try {
-            const data = await authService.me(token);
-            setUser(data);
-        } catch (err) {
-            clearAuth();
-            throw err;
-        }
+        const data = await authService.me(token);
+        setUser(data);
     };
 
     const login = async (email: string, password: string) => {
@@ -113,7 +108,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 const token = localStorage.getItem("accessToken");
 
                 if (token) {
-                    await fetchUser(token);
+                    try {
+                        await fetchUser(token);
+                    } catch {
+                        await refreshToken();
+                    }
                 } else {
                     await refreshToken();
                 }
