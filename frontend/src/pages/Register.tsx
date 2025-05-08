@@ -6,12 +6,11 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function Register() {
     const { register } = useAuth();
 
-    const [name, setName] = useState("Raju Thapa");
-    const [email, setEmail] = useState("raju@gmail.com");
-    const [password, setPassword] = useState("Intumintu@bhintu1");
-    const [passwordConfirmation, setPasswordConfirmation] =
-        useState("Intumintu@bhintu1");
-    const [phone, setPhone] = useState("+977-9800000000");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [passwordConfirmation, setPasswordConfirmation] = useState("");
+    const [phone, setPhone] = useState("");
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);

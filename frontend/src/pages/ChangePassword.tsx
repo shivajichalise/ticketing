@@ -8,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 export default function ChangePassword() {
     const { accessToken, logout } = useAuth();
 
-    const [oldPassword, setOldPassword] = useState("Intumintu@bhintu1");
+    const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [passwordConfirmation, setPasswordConfirmation] = useState("");
 
