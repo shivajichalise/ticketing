@@ -98,6 +98,15 @@ export default function TicketPage() {
                                 >
                                     View
                                 </Button>
+                                {ticket.paid && (
+                                    <Button
+                                        className="ml-2"
+                                        disabled
+                                        variant="outline"
+                                    >
+                                        Purchased
+                                    </Button>
+                                )}
                             </CardContent>
                         </Card>
                     ))}
