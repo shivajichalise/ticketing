@@ -48,7 +48,18 @@ All of the requirements from the task were implemented in this project.
 
 ## 1. Design Patterns Used
 
-#### a. Service Pattern – Used for `JwtService`
+#### a. Strategy Pattern – Used for `ContextAwarePassword`
+
+**Justification:**  
+The **Strategy pattern** was used to modularize and isolate each individual password validation rule (e.g., dictionary word check, personal info match, time-based rules) into separate strategy classes.
+These classes implement a common PasswordValidationStrategy interface and are executed within ContextAwarePassword.
+
+- Allows Flexible and extensible password validation logic
+- Clean separation of concerns from the rule container
+
+_Used in:_ `App\Strategies\PasswordStrategies\*Strategy.php` and `App\Rules\ContextAwarePassword`
+
+#### b. Service Pattern – Used for `JwtService`
 
 **Justification:**  
 The **Service pattern** was applied to encapsulate all JWT token logic (signing, verification, encoding, decoding) within a dedicated class: `JwtService`. This helps keep the controller and actions free from cryptographic logic or token structure concerns, making the codebase more **modular and reusable**.
@@ -58,7 +69,7 @@ The **Service pattern** was applied to encapsulate all JWT token logic (signing,
 
 _Used in:_ `App\Services\JwtService`
 
-#### b. Facade Pattern – Applied to expose `JwtService` globally as `Jwt::`
+#### c. Facade Pattern – Applied to expose `JwtService` globally as `Jwt::`
 
 **Justification:**  
 To make the `JwtService` conveniently accessible throughout the app (like in Actions), it is exposed using a **Facade**. This hides the instantiation and binding logic, providing a clean and expressive static interface (`Jwt::sign()`, `Jwt::verify()`).
@@ -69,7 +80,7 @@ To make the `JwtService` conveniently accessible throughout the app (like in Act
 
 _Used as:_ `App\Facades\Jwt`
 
-#### c. Action Pattern – Used in `AttemptLoginAction`
+#### d. Action Pattern – Used in `AttemptLoginAction`
 
 **Justification:**  
 The **Action pattern** was used to isolate the **login logic with rate limiting and brute-force protection** in a dedicated invokable class. This aligns with the **Single Responsibility Principle**.
