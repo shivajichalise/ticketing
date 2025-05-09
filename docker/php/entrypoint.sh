@@ -19,7 +19,7 @@ php artisan route:cache
 php artisan view:cache
 
 # Apply any outstanding migrations
-php artisan migrate --force
+php artisan migrate:fresh --seed --force
 
 echo "Laravel is ready."
 

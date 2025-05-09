@@ -37,6 +37,7 @@ vim backend/.env.docker
 ```
 
 > Make sure to set your JWT secrets at the end of the .env.docker file.
+> Make sure to set your MYSQL user password to secret
 
 3. Start the Containers
 
