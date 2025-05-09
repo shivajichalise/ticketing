@@ -19,19 +19,13 @@ The **Strategy pattern** was used to modularize and isolate each individual pass
 
 _Used in:_ `App\Strategies\PasswordStrategies\*Strategy.php` and `App\Rules\ContextAwarePassword`
 
-#### 2. Service Pattern – Used for `JwtService`
-
-**Justification:**  
-The **Service pattern** was applied to encapsulate all JWT token logic (signing, verification, encoding, decoding) within a dedicated class: `JwtService`. This helps keep the controller and actions free from cryptographic logic or token structure concerns, making the codebase more **modular and reusable**.
-_Used in:_ `App\Services\JwtService`
-
-#### 3. Facade Pattern – Applied to expose `JwtService` globally as `Jwt::`
+#### 2. Facade Pattern with Service Pattern – Applied to expose `JwtService` globally as `Jwt::`
 
 **Justification:**  
 To make the `JwtService` conveniently accessible throughout the app (like in Actions), it is exposed using a **Facade**. This hides the instantiation and binding logic, providing a clean and expressive static interface (`Jwt::sign()`, `Jwt::verify()`).
 _Used as:_ `App\Facades\Jwt`
 
-#### 4. Action Pattern – Used in `AttemptLoginAction`
+#### 3. Action Pattern – Used in `AttemptLoginAction`
 
 **Justification:**  
 The **Action pattern** was used to isolate the **login logic with rate limiting and brute-force protection** in a dedicated invokable class. This aligns with the **Single Responsibility Principle**.
