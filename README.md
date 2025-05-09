@@ -29,13 +29,22 @@ git clone https://github.com/shivajichalise/ticketing.git
 cd ticketing
 ```
 
-2. Start the Containers
+2. Configure the environment
+
+```bash
+cp backend/.env.docker.example backend/.env.docker
+vim backend/.env.docker
+```
+
+> Make sure to set your JWT secrets at the end of the .env.docker file.
+
+3. Start the Containers
 
 ```bash
 docker compose up --build
 ```
 
-3. Access the project
+4. Access the project
 
 - Frontend: `locahost:5173`
 - API: `locahost:8000/api`
