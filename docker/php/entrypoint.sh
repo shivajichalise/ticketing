@@ -3,6 +3,9 @@ set -e
 
 echo "Preparing Laravel environment..."
 
+# Install dependencies
+composer install --no-interaction --prefer-dist --optimize-autoloader
+
 # Link storage (safe to ignore if already linked)
 php artisan storage:link || true
 
